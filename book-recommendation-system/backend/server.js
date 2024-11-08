@@ -12,7 +12,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Usar CORS
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // Permitir apenas a origem do frontend
+    credentials: true // Permitir cookies e credenciais
+}));
 
 // Middleware para analisar o corpo das requisições
 app.use(express.json());

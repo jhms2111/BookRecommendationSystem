@@ -37,11 +37,13 @@ const Login = ({ handleLogin }) => {
             }
         }
     };
-
     const handleGoogleLogin = () => {
         // Redireciona para a rota de autenticação do Google
-        window.open('http://localhost:5000/auth/google', '_self');
+        window.location.href = 'http://localhost:5000/auth/google';
     };
+    
+    
+    
 
     return (
         <Container maxWidth="sm">

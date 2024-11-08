@@ -3,16 +3,31 @@ const passport = require('passport');
 
 const router = express.Router();
 
+const jwt = require('jsonwebtoken');
+require('dotenv').config(); // Certifique-se de que as variáveis de ambiente estão configuradas
+
+function generateAuthToken(user) {
+    const payload = {
+        id: user.id,
+        nome: user.nome,
+        email: user.email
+    };
+
+    // Use uma chave secreta segura armazenada em uma variável de ambiente
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return token;
+}
+
+
 // Rota para autenticação com Google
 router.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
 
-// Rota de callback do Google
 router.get('/auth/google/callback', passport.authenticate('google', {
-    failureRedirect: '/login' // Redireciona para a página de login em caso de falha
+    failureRedirect: '/login'
 }), async (req, res) => {
-    console.log('Callback do Google chamado.'); // Log para verificar se a rota é atingida
+    // Dados do usuário autenticado
     const user = {
         id: req.user._id,
         nome: req.user.nome,
@@ -20,15 +35,16 @@ router.get('/auth/google/callback', passport.authenticate('google', {
         googleId: req.user.googleId
     };
 
-    console.log('Usuário autenticado:', user); // Log para verificar os dados do usuário
+    // Gera um token de autenticação usando JWT
+    const authToken = generateAuthToken(user);
 
-    // Redirecionar com os dados do usuário
-    //res.redirect(`http://localhost:3000?user=${encodeURIComponent(JSON.stringify(user))}`);
-    // Redirecionar com os dados do usuário e um token de sucesso
-    res.redirect(`http://localhost:3000?user=${encodeURIComponent(JSON.stringify(user))}&auth=true`);
-
-
+    // Redireciona para o front-end com o token como parâmetro
+    res.redirect(`http://localhost:3000/auth/success?token=${authToken}`);
 });
+
+
+
+
 
 module.exports = router;
 
