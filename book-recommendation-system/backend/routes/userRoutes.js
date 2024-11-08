@@ -18,60 +18,70 @@ const isPasswordStrong = (senha) => {
 };
 
 router.post('/api/usuarios', async (req, res) => {
-    console.log('Requisição recebida para cadastro de usuário:', req.body); // Log para depuração
-
     const { nome, email, senha } = req.body;
+
+    // Log para verificar se todos os campos estão recebidos
+    console.log('Dados recebidos para cadastro:', req.body);
 
     // Verifique se todos os campos foram recebidos
     if (!nome || !email || !senha) {
+        console.log('Erro: Campos obrigatórios não foram preenchidos.');
         return res.status(400).send({ error: 'Todos os campos são obrigatórios.' });
     }
 
     // Validar o formato do email
     if (!validateEmail(email)) {
+        console.log('Erro: Formato de email inválido:', email);
         return res.status(400).send({ error: 'Formato de email inválido.' });
     }
 
     // Verificar a força da senha
     if (!isPasswordStrong(senha)) {
+        console.log('Erro: Senha fraca.');
         return res.status(400).send({ error: 'A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula e um número.' });
     }
 
     try {
-        // Hash da senha
         const hashedPassword = await bcrypt.hash(senha, 10);
-        
         const usuario = new User({ nome, email, senha: hashedPassword });
-
         await usuario.save();
+        console.log('Usuário cadastrado com sucesso:', usuario);
         res.status(201).send({ message: 'Usuário cadastrado com sucesso!' });
     } catch (error) {
+        console.log('Erro ao cadastrar usuário:', error);
         res.status(400).send({ error: 'Erro ao cadastrar usuário', details: error });
     }
 });
 
-// Rota para login de usuário
-router.post('/api/login', async (req, res) => {
-    console.log('Requisição recebida para login:', req.body); // Log para depuração
 
+// backend/routes/userRoutes.js
+router.post('/api/login', async (req, res) => {
+    console.log('Requisição recebida para login:', req.body);
+    
     const { email, senha } = req.body;
 
     try {
         const usuario = await User.findOne({ email });
         if (!usuario) {
+            console.log('Usuário não encontrado:', email);
             return res.status(400).send({ error: 'Usuário não encontrado' });
         }
 
         const match = await bcrypt.compare(senha, usuario.senha);
         if (!match) {
+            console.log('Senha incorreta para o usuário:', email);
             return res.status(400).send({ error: 'Senha incorreta' });
         }
 
-        res.send({ message: 'Login bem-sucedido', usuario });
+        // Se o login for bem-sucedido, envie a resposta
+        console.log('Login bem-sucedido para o usuário:', usuario);
+        res.send({ message: 'Login bem-sucedido', usuario }); // Envie a resposta ao frontend
     } catch (error) {
+        console.log('Erro ao fazer login:', error);
         res.status(500).send({ error: 'Erro ao fazer login', details: error });
     }
 });
+
 
 // Rota para solicitar recuperação de senha
 router.post('/api/recover', async (req, res) => {

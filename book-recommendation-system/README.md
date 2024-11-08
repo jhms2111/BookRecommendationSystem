@@ -22,8 +22,4 @@ To get a local copy up and running, follow these steps:
 - Node.js and npm installed on your machine.
 - A MongoDB or MySQL database setup (if applicable).
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/BookRecommendationSystem.git
 # BookRecommendationSystem

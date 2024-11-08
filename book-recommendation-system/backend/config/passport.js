@@ -1,7 +1,6 @@
-// backend/config/passport.js
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/User'); // Ajuste o caminho se necessário
+const User = require('../models/User');
 require('dotenv').config();
 
 const credentials = {
@@ -9,39 +8,32 @@ const credentials = {
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
 };
 
-
-// backend/config/passport.js
 passport.use(new GoogleStrategy({
     clientID: credentials.clientID,
     clientSecret: credentials.clientSecret,
     callbackURL: '/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        // Verifica se o usuário já existe na base de dados
         let usuario = await User.findOne({ googleId: profile.id });
         if (!usuario) {
-            // Se o usuário não existir, cria um novo sem senha
             usuario = new User({
                 nome: profile.displayName,
                 email: profile.emails[0].value,
-                googleId: profile.id
-                // Não inclui senha aqui
+                googleId: profile.id // Armazena o googleId
             });
-            await usuario.save(); // Salva o novo usuário no banco de dados
+            await usuario.save();
         }
-        done(null, usuario); // Chama done com o usuário autenticado
+        done(null, usuario);
     } catch (error) {
-        done(error); // Chama done com um erro, se houver
+        done(error);
     }
 }));
 
-
-// Serialize e deserialize
 passport.serializeUser((usuario, done) => {
-    done(null, usuario.id); // Armazena o ID do usuário na sessão
+    done(null, usuario.id);
 });
 
 passport.deserializeUser(async (id, done) => {
-    const usuario = await User.findById(id); // Recupera o usuário da base de dados
-    done(null, usuario); // Chama done com o usuário recuperado
+    const usuario = await User.findById(id);
+    done(null, usuario);
 });

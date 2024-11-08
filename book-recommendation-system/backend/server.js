@@ -1,13 +1,18 @@
+// backend/server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
+const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/authRoutes'); // Importa as rotas de autenticação
-require('./config/passport'); // Importa a configuração do Passport
+const authRoutes = require('./routes/authRoutes'); // Certifique-se de que esta linha está presente
+require('./config/passport');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Usar CORS
+app.use(cors());
 
 // Middleware para analisar o corpo das requisições
 app.use(express.json());
@@ -24,9 +29,9 @@ mongoose.connect('mongodb://localhost:27017/BookRecommendationSystem')
     .then(() => console.log('Conectado ao MongoDB'))
     .catch(err => console.error('Erro ao conectar ao MongoDB', err));
 
-// Usar as rotas de usuário
+// Usar as rotas
 app.use(userRoutes);
-app.use(authRoutes); // Usar as rotas de autenticação
+app.use(authRoutes); // Esta linha é importante para usar as rotas de autenticação
 
 // Rota principal
 app.get('/', (req, res) => {
