@@ -1,20 +1,23 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import SignupPage from './components/Signup';
-import ProtectedRoute from './components/ProtectedRoute';
-import AuthSuccess from './components/AuthSuccess'; // Importe o novo componente
+import Login from './components/Auth/Login';
+import SignupPage from './components/Auth/Signup';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+import AuthSuccess from './components/Auth/AuthSuccess';
+import BookSearchPage from './pages/Books/BookSearchPage';
+import BookDetailsPage from './pages/Books/BookDetailsPage';
+
 
 const App = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(null); // Inicialmente null
 
-    useEffect(() => {
-        const token = localStorage.getItem('isAuthenticated');
-        if (token === 'true') {
-            setIsAuthenticated(true);
-        }
-    }, []);
+useEffect(() => {
+    const token = localStorage.getItem('isAuthenticated');
+    setIsAuthenticated(token === 'true');
+}, []);
+
+    
 
     const handleLogin = () => {
         setIsAuthenticated(true);
@@ -24,7 +27,6 @@ const App = () => {
     const handleLogout = () => {
         setIsAuthenticated(false);
         localStorage.removeItem('isAuthenticated');
-        localStorage.removeItem('authToken');
     };
 
     return (
@@ -36,13 +38,27 @@ const App = () => {
                     path="/" 
                     element={
                         <ProtectedRoute isAuthenticated={isAuthenticated}>
-                            <h1>Welcome to the Book Recommendation System!</h1>
-                            <button onClick={handleLogout}>Logout</button>
+                            <div>
+                                <h1>Welcome to the Book Recommendation System!</h1>
+                                <button onClick={handleLogout}>Logout</button>
+                            </div>
                         </ProtectedRoute>
                     } 
                 />
-                {/* Adicione a rota de sucesso da autenticação */}
                 <Route path="/auth/success" element={<AuthSuccess setIsAuthenticated={setIsAuthenticated} />} />
+                <Route path="/search-books" element={<BookSearchPage />} />
+                <Route path="/book/:bookId" element={<BookDetailsPage />} />
+             
+                <Route 
+                    path="/search-books" 
+                    element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <BookSearchPage />
+                        </ProtectedRoute>
+                    } 
+
+                    
+                />
             </Routes>
         </Router>
     );
